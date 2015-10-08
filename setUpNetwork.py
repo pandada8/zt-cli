@@ -21,34 +21,84 @@ def getIp(s):
         except ValueError:
             print("Wrong input")
 
+class Network:
+
+    def __init__(self, data=None):
+        if None:
+            pass
+
+class Node:
+
+    def __init__(self, data=None):
+        pass
+
+
+
+class ZeroTier(object):
+
+    def __init__(self, host="http://127.0.0.1:9993"):
+        self.host = "http://127.0.0.1:9993"
+        self.r = session()
+
+    def _loadToken(self):
+        if os.geteuid() != 0:
+            os.execvp("sudo", ["sudo"] + sys.argv)
+        token = open("/var/lib/zerotier-one/authtoken.secret").read()
+        self.r.headers['X-ZT1-Auth'] = token
+
+    def getStatus(self):
+        data = r.get(self.host + "/status").json()
+        if data['version']:
+            print("Version:", data['version'])
+            self.address = data['address']
+            self.r = r
+            ret = self.r.get(self.host + "/controller").json()
+            self.controller = not ret['controller']
+        else:
+            print("Fail when talk with zerotier")
+            sys.exit(1)
+
+
+class ZeroTierController(ZeroTier):
+
+    def getHostedNetworks(self):
+        return self.r.get(self.host+"/controller/network").json()
+
+    def getHostedNetworkInfo(self, nwid):
+        return self.r.get(self.host+"/controller/network/"+nwid).json()
+
+    def
+
+
 
 class Application:
 
     def __init__(self):
         self.cfg = {}
-        self.host = "http://127.0.0.1:"
+        
 
     def loadToken(self):
-        print("Try to run the program using sudo")
         if os.geteuid() != 0:
             os.execvp("sudo", ["sudo"] + sys.argv)
         token = open("/var/lib/zerotier-one/authtoken.secret").read()
-        r = session()
-        r.headers['X-ZT1-Auth'] = token
 
-        data = r.get("http://127.0.0.1:9993/status").json()
+        self.r.headers['X-ZT1-Auth'] = token
+
+        data = r.get(self.host + "/status").json()
         if data['version']:
-            print("Loaded the token")
             print("Version:", data['version'])
             self.address = data['address']
             self.r = r
-            ret = self.r.get("http://127.0.0.1:9993/controller").json()
+            ret = self.r.get(self.host + "/controller").json()
             if not ret['controller']:
-                print("Not a controller")
+                print("The Node is not a controlle\nrecompile the package with 'ZT_ENABLE_NETWORK_CONTROLLER=1' can get you a controller")
                 sys.exit(1)
-
         else:
-            raise RuntimeError
+            print("Fail when talk with zerotier")
+            sys.exit(1)
+
+    def getNwid(self):
+        self.r.get(self.host + "/")
 
     def setNwid(self):
         nwid = input("Input the networkid [000000]:")
